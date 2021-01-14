@@ -81,6 +81,22 @@ app.get("/api/users", (req, res) => {
   res.status(401).send("Unauthorized");
 });
 
+app.post("/api/users", (req, res) => {
+  const { firstname, lastname, email } = req.body;
+  connection.query(
+    "INSERT INTO users(firstname, lastname, email) VALUES(?, ?, ?)",
+    [firstname, lastname, email], 
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving data");
+      } else {
+        res.status(200).json(results);
+      }
+    }
+  );
+});
+
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
 });
