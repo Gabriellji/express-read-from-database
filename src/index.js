@@ -76,6 +76,22 @@ app.put("/api/movies/:id", (req, res) => {
       }
     }
   )
+});
+
+app.delete("/api/movies/:id", (req, res) => {
+  const movieId = req.params.id;
+  connection.query(
+    "DELETE FROM movies WHERE id=?",
+    [movieId],
+    (err) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("😱 Error deleting an movie");
+      } else {
+        res.status(200).send("🎉 Movie deleted!");
+      }
+    }
+  )
 })
 
 app.get("/api/search", (req, res) => {
@@ -129,6 +145,21 @@ app.put("/api/users/:id", (req, res) => {
       }
     }
   );
+});
+
+app.delete("/api/users/:id", (req, res) => {
+  const idUser = req.params.id; 
+  connection.query(
+    "DELETE FROM users WHERE id = ?",
+    [idUser],
+    (err) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("😱 Error deleting an user");
+      } else {
+        res.status(200).send("🎉 User deleted!");
+      }
+  });
 });
 
 app.listen(port, () => {
