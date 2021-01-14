@@ -61,6 +61,23 @@ app.get("/api/movies/:id", (req, res) => {
   );
 });
 
+app.put("/api/movies/:id", (req, res) => {
+  const movieId = req.params.id;
+  const newMovie = req.body;
+  connection.query(
+    "UPDATE movies SET ? WHERE id = ?",
+    [newMovie, movieId],
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error updating a movie");
+      } else {
+        res.status(200).send("Movie updated successfully 🎉");
+      }
+    }
+  )
+})
+
 app.get("/api/search", (req, res) => {
   connection.query(
     "SELECT * from movies WHERE duration <=?",
@@ -92,6 +109,23 @@ app.post("/api/users", (req, res) => {
         res.status(500).send("Error retrieving data");
       } else {
         res.status(200).json(results);
+      }
+    }
+  );
+});
+
+app.put("/api/users/:id", (req, res) => {
+  const idUser = req.params.id;
+  const newUser = req.body;
+  connection.query(
+    "UPDATE users SET ? WHERE id = ?",
+    [newUser, idUser],
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error updating a user");
+      } else {
+        res.status(200).send("User updated successfully 🎉");
       }
     }
   );
