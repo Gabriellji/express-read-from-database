@@ -21,7 +21,13 @@ app.get("/", (request, response) => {
 });
 
 app.get("/api/movies", (req, res) => {
-  connection.query("SELECT * from movies", (err, results) => {
+  let sql = "SELECT * from movies";
+  const sqlValues = [];
+  if (req.query.color) {
+    sql += ' WHERE color = ?';
+    sqlValues.push(req.query.color);
+  } 
+  connection.query(sql, sqlValues, (err, results) => {
     if (err) {
       res.status(500).send("Error retrieving data");
     } else {
@@ -34,28 +40,33 @@ app.post("/api/movies", (req, res) => {
   const { title, director, year, color, duration } = req.body;
   connection.query(
     "INSERT INTO movies(title, director, year, color, duration) VALUES(?, ?, ?, ?, ?)",
-    [title, director, year, color, duration], 
+    [title, director, year, color, duration],
     (err, results) => {
-          if (err) {
-            console.log(err);
-            res.status(500).send("Error saving a movie");
-          } else {
-            res.status(200).send("Successfully saved");
-          }
-        }
-    ); 
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error saving a movie");
+      } else {
+        res.status(200).send("Successfully saved");
+      }
+    }
+  );
 });
 
 app.get("/api/movies/:id", (req, res) => {
+  const movieId = req.params.id;
+  const sql = "SELECT * from movies WHERE id=?";
   connection.query(
-    "SELECT * from movies WHERE id=?",
-    [req.params.id],
+    sql,
+    [movieId],
     (err, results) => {
       if (err) {
         console.log(err);
         res.status(500).send("Error retrieving data");
       } else {
-        res.status(200).json(results);
+        if (!results[0]) {
+          res.status(404).send("Movie not found");
+        }
+        res.status(200).json(results[0]);
       }
     }
   );
@@ -111,14 +122,48 @@ app.get("/api/search", (req, res) => {
 });
 
 app.get("/api/users", (req, res) => {
-  res.status(401).send("Unauthorized");
+  let sql = 'SELECT * FROM users';
+  const sqlValues = [];
+  if (req.query.city) {
+    sql += ' WHERE city = ?';
+    sqlValues.push(req.query.city);
+  }
+  connection.query(
+    sql, sqlValues, (err, results) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send(`An error occurred: ${err.message}`);
+      } else {
+        res.json(results)
+      }
+    }
+  )
 });
+
+app.get("/api/users/:id", (req, res) => {
+  const userId = req.params.id;
+  connection.query(
+    "SELECT * from users WHERE id=?",
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send("Error retrieving data");
+      } else {
+        if (!results[0]) {
+          res.status(404).send("User not found")
+        }
+        res.status(200).json(results[0]);
+      }
+    }
+  );
+})
 
 app.post("/api/users", (req, res) => {
   const { firstname, lastname, email } = req.body;
   connection.query(
     "INSERT INTO users(firstname, lastname, email) VALUES(?, ?, ?)",
-    [firstname, lastname, email], 
+    [firstname, lastname, email],
     (err, results) => {
       if (err) {
         console.log(err);
@@ -148,7 +193,7 @@ app.put("/api/users/:id", (req, res) => {
 });
 
 app.delete("/api/users/:id", (req, res) => {
-  const idUser = req.params.id; 
+  const idUser = req.params.id;
   connection.query(
     "DELETE FROM users WHERE id = ?",
     [idUser],
@@ -159,7 +204,7 @@ app.delete("/api/users/:id", (req, res) => {
       } else {
         res.status(200).send("🎉 User deleted!");
       }
-  });
+    });
 });
 
 app.listen(port, () => {
